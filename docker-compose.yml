@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  market-data-service:
+    build:
+      context: ./market-data-service
+      dockerfile: Dockerfile
+    container_name: market-data-service
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - GOLD_CACHE_TTL=300
+      - STOCK_CACHE_TTL=300
+      - METALPRICE_API_KEY=${METALPRICE_API_KEY:-your_metalprice_api_key_here}
+      - FINNHUB_API_KEY=${FINNHUB_API_KEY:-your_finnhub_api_key_here}
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:4000/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  cloudops-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cloudops-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MARKET_SERVICE_URL=http://market-data-service:4000
+    depends_on:
+      market-data-service:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cloudops-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cloudops-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - cloudops-backend
+    restart: unless-stopped
+

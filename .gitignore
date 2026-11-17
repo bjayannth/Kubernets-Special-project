@@ -1,0 +1,22 @@
+# Dependencies
+**/node_modules/
+
+# Local environment files and secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# Generated frontend output
+**/dist/
+**/build/
+
+# Local runtime data
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/cache_store.json
+
+# Logs and local tooling files
+**/*.log
+.DS_Store
+Thumbs.db
